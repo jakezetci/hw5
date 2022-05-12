@@ -18,8 +18,9 @@ import json
 if __name__ == "__main__":
     data = fits.open('speckledata.fits')[2].data
     mean = np.mean(data, axis=0)
+    meanIm = Image.fromarray(mean).resize((512, 512))
 
-    plt.imsave('mean.png', mean, cmap='gray')
+    plt.imsave('mean.png', meanIm, cmap='gray')
 
     fourier = np.mean(np.abs(np.fft.fft2(data))**2, axis=0)
     fourier = np.fft.fftshift(fourier)
@@ -35,8 +36,9 @@ if __name__ == "__main__":
     fr_masked = ma.MaskedArray(fourier, mask=fr_mask, dtype=np.float64)
     noise = fr_masked.mean()
     fourier = fourier - noise
-    plt.imsave('fourier.png', fourier,
-               vmax=np.quantile(np.mean(fourier), 0.98),
+    fourierIm = Image.fromarray(fourier).resize((512, 512))
+    plt.imsave('fourier.png', fourierIm,
+               vmax=np.quantile(np.mean(fourierIm), 0.98),
                cmap='gray')
     N = 360
     angle_mean = np.empty(N)
@@ -45,16 +47,16 @@ if __name__ == "__main__":
         rotatedim = ndimage.rotate(fourier, i * 360 / N, reshape=False)
         rotated[i] = rotatedim
     im = np.mean(rotated, axis=0)
-
-    plt.imsave('rotaver.png', im, vmax=np.quantile(np.mean(fourier), 0.98),
-               cmap='gray')
+    rotatedIm = Image.fromarray(im).resize((512, 512))
+    plt.imsave('rotaver.png', rotatedIm, vmax=np.quantile(
+        np.mean(rotatedIm), 0.98), cmap='gray')
 
     im_masked = ma.MaskedArray(fourier/im, mask=np.invert(fr_mask)).filled(
         fill_value=0)
     binary = abs(np.fft.ifft2((im_masked), axes=(0, 1)))
     binary = np.fft.fftshift(binary)
-    binary2 = Image.fromarray(binary).resize((512, 512))
-    plt.imsave('binary.png', binary2,
+    binaryIm = Image.fromarray(binary).resize((512, 512))
+    plt.imsave('binary.png', binaryIm,
                cmap='gray')
 
     '''бонуска'''
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     peak_x = tbl['x_peak']
     peak_y = tbl['y_peak']
     """мы нашли ровно три пика, поэтому никаких сортировок по интенсивности
-    смысла делать не имеется"""
+    смысла делать не имеется, спасибо нашему трешхолду"""
     dis = np.sqrt((peak_x[1]-peak_x[0])**2+(peak_y[1]-peak_y[0])**2)
     dictionary = {"distance": dis*0.0206}
     with open('binary.json', 'w') as f:
