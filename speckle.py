@@ -63,6 +63,8 @@ if __name__ == "__main__":
     tbl['peak_value'].info.format = '%.8g'
     peak_x = tbl['x_peak']
     peak_y = tbl['y_peak']
+    """мы нашли ровно три пика, поэтому никаких сортировок по интенсивности
+    смысла делать не имеется"""
     dis = np.sqrt((peak_x[1]-peak_x[0])**2+(peak_y[1]-peak_y[0])**2)
     dictionary = {"distance": dis*0.0206}
     with open('binary.json', 'w') as f:
